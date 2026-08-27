@@ -1,18 +1,18 @@
-﻿.playwright-mcp
-  console-2026-07-12T06-22-55-462Z.log
-  console-2026-07-12T06-23-56-795Z.log
-  page-2026-07-12T06-22-56-531Z.yml
-  page-2026-07-12T06-23-57-298Z.yml
 client
+  public
   src
     api
+      audit.js
       auth.js
       axios.js
+      customers.js
       dashboard.js
       drivers.js
       expenses.js
       fuel.js
       maintenance.js
+      me.js
+      notifications.js
       reports.js
       trips.js
       users.js
@@ -20,6 +20,7 @@ client
     components
       layout
         AppLayout.jsx
+        ErrorBoundary.jsx
         ProtectedRoute.jsx
         Sidebar.jsx
         Topbar.jsx
@@ -31,44 +32,40 @@ client
         StatusBadge.jsx
       ui
         alert.tsx
-        avatar.jsx
         badge.jsx
         button.jsx
-        calendar.jsx
-        card.jsx
-        chart.jsx
         checkbox.tsx
         dialog.jsx
         dropdown-menu.tsx
-        Glow.jsx
         input.jsx
         label.jsx
-        popover.tsx
-        progress.jsx
-        scroll-area.tsx
         select.jsx
-        separator.tsx
-        sheet.tsx
-        switch.jsx
         table.jsx
         tabs.jsx
-        textarea.jsx
+        toast.jsx
         tooltip.tsx
+    config
+      roles.js
     contexts
       AuthContext.jsx
       DataContext.jsx
-    data
-      mockData.js
+      ThemeContext.jsx
+    hooks
+      useObjectUrl.js
+      useToast.js
     lib
       utils.ts
     pages
       Analytics.jsx
+      AuditLog.jsx
+      Customers.jsx
       Dashboard.jsx
       Drivers.jsx
       Fleet.jsx
       FuelExpenses.jsx
       Login.jsx
       Maintenance.jsx
+      MyTrips.jsx
       Settings.jsx
       Trips.jsx
       Users.jsx
@@ -76,13 +73,12 @@ client
     index.css
     main.jsx
   .gitignore
-  components.json
   DESIGN.md
+  README.md
+  components.json
   eslint.config.js
   index.html
-  package-lock.json
   package.json
-  README.md
   tsconfig.json
   vite.config.js
 server
@@ -92,20 +88,28 @@ server
     Steps-2.txt
   prisma
     migrations
-      20260712083635_init
+      20260712095935_init
+        migration.sql
+      20260827120000_ops_hardening
         migration.sql
       migration_lock.toml
     schema.prisma
     seedData.js
     seedUsers.js
   src
+    config
+      env.js
+      permissions.js
     controllers
+      audit.controller.js
       auth.controller.js
+      customer.controller.js
       dashboard.controller.js
       driver.controller.js
       expense.controller.js
       fuel.controller.js
       maintenance.controller.js
+      me.controller.js
       notification.controller.js
       report.controller.js
       trip.controller.js
@@ -117,31 +121,46 @@ server
       auth.middleware.js
       upload.middleware.js
     routes
+      audit.routes.js
       auth.routes.js
+      customer.routes.js
       dashboard.routes.js
       driver.routes.js
       expense.routes.js
       fuel.routes.js
       maintenance.routes.js
+      me.routes.js
       notification.routes.js
       report.routes.js
       trip.routes.js
       user.routes.js
       vehicle.routes.js
     services
+      cloudinary.service.js
       email.service.js
+      gemini.client.js
       license.service.js
       notification.service.js
+      pricing.service.js
+      safety.service.js
+      scheduling.service.js
+      vehicleDocument.service.js
     utils
+      ApiError.js
       asyncHandler.js
-      extractLicense.js
+      audit.js
+      cookies.js
       generateTokens.js
-      hashPassword.js
+      pagination.js
+      validators.js
   .env
   .gitignore
   app.js
   index.js
-  package-lock.json
   package.json
   prisma.config.ts
+FIXES.md
+ISSUES.md
+README.md
+TECHNICAL.md
 project_structure.txt

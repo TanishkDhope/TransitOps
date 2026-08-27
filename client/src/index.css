@@ -167,6 +167,15 @@
   color: #5B899E;
   border: 1px solid rgba(91, 137, 158, 0.2);
 }
+/* Archived / inactive — deliberately low-contrast so it recedes */
+.badge-neutral {
+  background: rgba(156, 163, 175, 0.12);
+  color: #6B7280;
+  border: 1px solid rgba(156, 163, 175, 0.24);
+}
+.dark .badge-neutral {
+  color: #9CA3AF;
+}
 
 /* ===== Glassmorphism Card ===== */
 .glass-card {

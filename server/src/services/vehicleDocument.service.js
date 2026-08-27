@@ -1,8 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+import {
+  getGeminiClient,
+  parseJsonResponse,
+  normaliseDate,
+  GEMINI_MODEL,
+} from "./gemini.client.js";
 
 const EXTRACTION_PROMPT = `
 These images are documents for the SAME vehicle — any mix of Registration Certificate (RC),
@@ -23,9 +24,20 @@ Return ONLY valid JSON, no markdown fences, matching exactly this shape:
 Dates must be in YYYY-MM-DD format. If a field cannot be read or the relevant document wasn't provided, leave it as an empty string.
 `;
 
+export const EMPTY_VEHICLE_EXTRACTION = {
+  rcNumber: "",
+  insuranceNumber: "",
+  insuranceExpiry: "",
+  pucNumber: "",
+  pucExpiry: "",
+};
+
+/** Extracts RC / insurance / PUC details from one or more document photos. */
 export async function extractVehicleDocumentDetails(files) {
+  const ai = getGeminiClient();
+
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-flash-lite",
+    model: GEMINI_MODEL,
     contents: [
       ...files.map((file) => ({
         inlineData: {
@@ -37,7 +49,15 @@ export async function extractVehicleDocumentDetails(files) {
     ],
   });
 
-  const raw = response.text.trim().replace(/^```(json)?/i, "").replace(/```$/, "").trim();
+  const parsed = parseJsonResponse(response.text, "vehicle documents");
 
-  return JSON.parse(raw);
+  return {
+    rcNumber: parsed.rcNumber?.trim() || "",
+    insuranceNumber: parsed.insuranceNumber?.trim() || "",
+    insuranceExpiry: normaliseDate(parsed.insuranceExpiry),
+    pucNumber: parsed.pucNumber?.trim() || "",
+    pucExpiry: normaliseDate(parsed.pucExpiry),
+  };
 }
+
+export default extractVehicleDocumentDetails;

@@ -29,6 +29,7 @@ enum DriverStatus {
   ON_TRIP
   OFF_DUTY
   SUSPENDED
+  ARCHIVED // soft-delete: preserved for trip history, never assignable
 }
 
 enum TripStatus {
@@ -51,15 +52,23 @@ enum ExpenseType {
   OTHER
 }
 
+enum NotificationType {
+  LICENSE_EXPIRY
+  INSURANCE_EXPIRY
+  PUC_EXPIRY
+  SERVICE_DUE
+}
+
 // ---------- MODELS ----------
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
   password     String
-  username     String
+  username     String   @unique
   role         Role     @default(DRIVER)
   refreshToken String?
   driver       Driver? // optional link if this user IS a driver
+  auditLogs    AuditLog[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -81,7 +90,12 @@ model Vehicle {
   pucNumber        String?
   pucExpiry        DateTime?
   insuranceExpired Boolean   @default(false) // auto-maintained by the insurance expiry cron
+  pucExpired       Boolean   @default(false) // auto-maintained by the PUC expiry cron
   documentUrls     String[]  @default([]) // Cloudinary URLs of uploaded RC/Insurance/PUC images
+
+  // preventive maintenance scheduling
+  serviceIntervalKm   Float? // e.g. service every 10000 km
+  lastServiceOdometer Float  @default(0)
 
   trips           Trip[]
   maintenanceLogs MaintenanceLog[]
@@ -105,7 +119,7 @@ model Driver {
   licenseCategory String // LMV, HMV, etc.
   licenseExpiry   DateTime
   contactNumber   String
-  safetyScore     Int          @default(100)
+  safetyScore     Int          @default(100) // derived — see services/safety.service.js
   status          DriverStatus @default(AVAILABLE)
   licenseFrontUrl String?
   licenseBackUrl  String?
@@ -116,6 +130,24 @@ model Driver {
   updatedAt DateTime @updatedAt
 
   @@index([status])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  // rate card: revenue = flatRate ?? (ratePerKm * distance) + (ratePerTonneKm * distance * tonnes)
+  ratePerKm      Decimal? @db.Decimal(10, 2)
+  ratePerTonneKm Decimal? @db.Decimal(10, 2)
+  flatRate       Decimal? @db.Decimal(12, 2)
+
+  trips Trip[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
 }
 
 model Trip {
@@ -130,6 +162,13 @@ model Trip {
   vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
   driverId  String
   driver    Driver  @relation(fields: [driverId], references: [id])
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  // scheduling window — availability is an interval-overlap question
+  plannedStart DateTime
+  plannedEnd   DateTime
 
   // filled on completion
   startOdometer Float?
@@ -150,6 +189,8 @@ model Trip {
   @@index([status])
   @@index([vehicleId, status])
   @@index([driverId, status])
+  @@index([vehicleId, plannedStart, plannedEnd])
+  @@index([driverId, plannedStart, plannedEnd])
 }
 
 model MaintenanceLog {
@@ -182,6 +223,7 @@ model FuelLog {
   createdAt DateTime @default(now())
 
   @@index([vehicleId])
+  @@index([tripId])
 }
 
 model Expense {
@@ -199,4 +241,38 @@ model Expense {
   createdAt DateTime @default(now())
 
   @@index([vehicleId])
+  @@index([tripId])
+}
+
+// Who changed what, when. Written inside the same transaction as the mutation.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorEmail String? // denormalised so the trail survives user deletion
+  entity     String // "Vehicle" | "Driver" | "Trip" | ...
+  entityId   String
+  action     String // "CREATE" | "UPDATE" | "DELETE" | "DISPATCH" | ...
+  summary    String? // human-readable one-liner
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+// Delivery record + cooldown latch so recipients are not spammed every cron tick.
+model NotificationLog {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  subjectId String // driverId or vehicleId the notice is about
+  recipient String // email address
+  success   Boolean          @default(true)
+  error     String?
+  sentAt    DateTime         @default(now())
+
+  @@index([type, subjectId, sentAt])
+  @@index([recipient])
 }

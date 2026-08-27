@@ -1,15 +1,16 @@
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
-  // Vehicle statuses
+  // Vehicle
   AVAILABLE: { label: 'Available', className: 'badge-success' },
   ON_TRIP: { label: 'On Trip', className: 'badge-info' },
   IN_SHOP: { label: 'In Shop', className: 'badge-warning' },
   RETIRED: { label: 'Retired', className: 'badge-danger' },
-  // Driver statuses
+  // Driver
   OFF_DUTY: { label: 'Off Duty', className: 'badge-warning' },
   SUSPENDED: { label: 'Suspended', className: 'badge-danger' },
-  // Trip statuses
+  ARCHIVED: { label: 'Archived', className: 'badge-neutral' },
+  // Trip
   DRAFT: { label: 'Draft', className: 'badge-warning' },
   DISPATCHED: { label: 'Dispatched', className: 'badge-info' },
   COMPLETED: { label: 'Completed', className: 'badge-success' },

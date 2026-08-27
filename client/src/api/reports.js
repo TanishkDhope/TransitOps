@@ -1,22 +1,38 @@
 import api from "./axios.js";
-export const downloadReportPdf = async (report) => {
-  const res = await api.get("/api/v1/reports/export.pdf", {
-    params: { report },
+
+export const getFuelEfficiencyReport = (params) =>
+  api.get("/api/v1/reports/fuel-efficiency", { params });
+export const getFleetUtilizationReport = () => api.get("/api/v1/reports/fleet-utilization");
+export const getOperationalCostReport = (params) =>
+  api.get("/api/v1/reports/operational-cost", { params });
+export const getVehicleRoiReport = (params) => api.get("/api/v1/reports/vehicle-roi", { params });
+// ISSUES #35 — per-trip and per-lane profitability.
+export const getTripProfitabilityReport = (params) =>
+  api.get("/api/v1/reports/trip-profitability", { params });
+export const getLaneProfitabilityReport = (params) =>
+  api.get("/api/v1/reports/lane-profitability", { params });
+
+/** Streams a report to the browser as a file download. */
+async function downloadReport(format, report, params = {}) {
+  const res = await api.get(`/api/v1/reports/export.${format}`, {
+    params: { report, ...params },
     responseType: "blob",
   });
-  const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+
+  const mime = format === "pdf" ? "application/pdf" : "text/csv";
+  const url = window.URL.createObjectURL(new Blob([res.data], { type: mime }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${report}.pdf`;
+  link.download = `${report}.${format}`;
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.URL.revokeObjectURL(url);
-};
+}
 
-export const getFuelEfficiencyReport = () => api.get("/api/v1/reports/fuel-efficiency");
-export const getFleetUtilizationReport = () => api.get("/api/v1/reports/fleet-utilization");
-export const getOperationalCostReport = () => api.get("/api/v1/reports/operational-cost");
-export const getVehicleRoiReport = () => api.get("/api/v1/reports/vehicle-roi");
-export const getReportCsvUrl = (report) =>
-  `${api.defaults.baseURL}/api/v1/reports/export.csv?report=${report}`;
+export const downloadReportPdf = (report, params) => downloadReport("pdf", report, params);
+
+// Routed through axios so the auth cookie travels with the request. The previous
+// getReportCsvUrl() helper built a bare URL, which now returns 401 JSON instead
+// of a CSV because the reports router requires authentication.
+export const downloadReportCsv = (report, params) => downloadReport("csv", report, params);
