@@ -71,6 +71,7 @@ export default function Drivers() {
   const [isRecalculating, setIsRecalculating] = useState(false);
 
   const [suspendTarget, setSuspendTarget] = useState(null);
+  const [suspendReason, setSuspendReason] = useState("");
   const [archiveTarget, setArchiveTarget] = useState(null);
 
   const [frontImageFile, setFrontImageFile] = useState(null);
@@ -189,12 +190,13 @@ export default function Drivers() {
   async function handleConfirmSuspend() {
     if (!suspendTarget) return;
     try {
-      const result = await suspendDriver(suspendTarget.id);
+      const result = await suspendDriver(suspendTarget.id, suspendReason);
       toast.fromResponse(result, 'Driver suspended');
     } catch (err) {
       toast.apiError(err, 'Could not suspend the driver');
     } finally {
       setSuspendTarget(null);
+      setSuspendReason('');
     }
   }
 
@@ -608,15 +610,36 @@ export default function Drivers() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog
-        open={Boolean(suspendTarget)}
-        onOpenChange={(open) => !open && setSuspendTarget(null)}
-        title="Suspend Driver"
-        description={`Suspend ${suspendTarget?.name || ''}? They will not be assignable to new trips until reinstated.`}
-        confirmLabel="Suspend"
-        onConfirm={handleConfirmSuspend}
-        variant="destructive"
-      />
+      <Dialog open={Boolean(suspendTarget)} onOpenChange={(open) => {
+        if (!open) {
+          setSuspendTarget(null);
+          setSuspendReason("");
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suspend Driver</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Suspend {suspendTarget?.name || ''}? They will not be assignable to new trips until reinstated.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="suspendReason">Reason for Suspension</Label>
+              <Input 
+                id="suspendReason"
+                value={suspendReason} 
+                onChange={(e) => setSuspendReason(e.target.value)} 
+                placeholder="e.g. License expired, Safety violation"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSuspendTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmSuspend}>Suspend</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}

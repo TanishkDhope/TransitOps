@@ -16,6 +16,7 @@ import Customers from "./pages/Customers";
 import Maintenance from "./pages/Maintenance";
 import FuelExpenses from "./pages/FuelExpenses";
 import Analytics from "./pages/Analytics";
+import Copilot from "./pages/Copilot";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import AuditLog from "./pages/AuditLog";
@@ -54,6 +55,7 @@ function App() {
                       <Route path="/maintenance" element={<Maintenance />} />
                       <Route path="/fuel-expenses" element={<FuelExpenses />} />
                       <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/copilot" element={<Copilot />} />
                       <Route path="/users" element={<Users />} />
                       <Route path="/audit" element={<AuditLog />} />
                       {/* ISSUES #37 — driver self-service */}

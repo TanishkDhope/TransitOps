@@ -193,8 +193,8 @@ export function DataProvider({ children }) {
     return data;
   }, []);
 
-  const suspendDriver = useCallback(async (id) => {
-    const { data } = await driversApi.suspendDriver(id);
+  const suspendDriver = useCallback(async (id, reason) => {
+    const { data } = await driversApi.suspendDriver(id, reason);
     setDrivers((prev) => upsert(prev, data.data));
     return data;
   }, []);

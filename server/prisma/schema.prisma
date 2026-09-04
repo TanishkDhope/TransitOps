@@ -123,6 +123,7 @@ model Driver {
   status          DriverStatus @default(AVAILABLE)
   licenseFrontUrl String?
   licenseBackUrl  String?
+  suspensionReason String?
 
   trips Trip[]
 

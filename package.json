@@ -1,0 +1,15 @@
+{
+  "name": "transit-ops",
+  "private": true,
+  "version": "1.0.0",
+  "description": "TransitOps — fleet operations platform (Express API + React client + Copilot service)",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n api,copilot,web -c blue,magenta,green \"npm --prefix server run dev\" \"npm run dev:copilot\" \"npm --prefix client run dev\"",
+    "dev:services": "concurrently -n api,copilot -c blue,magenta \"npm --prefix server run dev\" \"npm run dev:copilot\"",
+    "dev:copilot": "cd copilot && uv run uvicorn main:app --host 127.0.0.1 --port 8100 --reload"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

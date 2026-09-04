@@ -34,6 +34,9 @@ const OPTIONAL_FEATURES = {
   gemini: ["GEMINI_API_KEY"],
   cloudinary: ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"],
   email: ["GMAIL_USER", "GMAIL_APP_PASSWORD"],
+  // Copilot is available only when both the service URL and the shared internal
+  // token are configured; either one missing disables the integration cleanly.
+  copilot: ["COPILOT_SERVICE_URL", "INTERNAL_SERVICE_TOKEN"],
 };
 
 const missingRequired = REQUIRED.filter((key) => !process.env[key]);
@@ -77,6 +80,8 @@ export const env = {
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
   geminiApiKey: process.env.GEMINI_API_KEY,
+  copilotServiceUrl: process.env.COPILOT_SERVICE_URL,
+  internalServiceToken: process.env.INTERNAL_SERVICE_TOKEN,
   gmailUser: process.env.GMAIL_USER,
   gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
   cloudinary: {

@@ -19,6 +19,7 @@ import customerRouter from "./src/routes/customer.routes.js";
 import auditRouter from "./src/routes/audit.routes.js";
 import notificationRouter from "./src/routes/notification.routes.js";
 import meRouter from "./src/routes/me.routes.js";
+import copilotRouter from "./src/routes/copilot.routes.js";
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/audit", auditRouter);
 // ISSUES #4 — this router existed but was never mounted.
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/copilot", copilotRouter);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "TransitOps API", version: "v1" });

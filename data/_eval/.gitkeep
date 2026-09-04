@@ -1,0 +1,4 @@
+# DO NOT INGEST. This directory (data/_eval/, underscore-prefixed) holds eval
+# ground truth only and must never enter the retrieval corpus. Any ingester must
+# skip every directory whose name begins with an underscore. This .gitkeep exists
+# so the directory is tracked even when CANON.md is otherwise the only file.

@@ -301,16 +301,21 @@ Odoo Hackathon/
 │       ├── contexts/           Auth · Data · Theme
 │       ├── hooks/              useToast · useObjectUrl
 │       └── pages/              one page per module
-└── server/                     Express 5 + Prisma 6 + PostgreSQL
-    ├── prisma/                 schema, migrations, seeds
-    └── src/
-        ├── config/             env validation · capability table
-        ├── controllers/        request handling + business rules
-        ├── routes/             URL → auth → capability → controller
-        ├── services/           Gemini, Cloudinary, email, cron, scheduling, pricing, safety
-        ├── middlewares/        JWT, capability guard, uploads
-        └── utils/              typed errors, audit, pagination, validators
+├── server/                     Express 5 + Prisma 6 + PostgreSQL
+│   ├── prisma/                 schema, migrations, seeds
+│   └── src/
+│       ├── config/             env validation · capability table
+│       ├── controllers/        request handling + business rules
+│       ├── routes/             URL → auth → capability → controller
+│       ├── services/           Gemini, Cloudinary, email, cron, scheduling, pricing, safety, copilot proxy
+│       ├── middlewares/        JWT, capability guard, uploads
+│       └── utils/              typed errors, audit, pagination, validators
+└── copilot/                    FastAPI (uv) — private knowledge + query service, loopback only
+    └── main.py                 /health + /ask (echo for now); Express is the only caller
 ```
+
+A root `package.json` provides one-command startup (`npm run dev`) that runs the API,
+the copilot service and the client together via `concurrently`.
 
 ---
 
@@ -331,7 +336,19 @@ cd server && npm run seed:data && npm run seed:users && npm run dev
 cd client && npm install && npm run dev
 ```
 
-API on `http://localhost:8000`, client on `http://localhost:5173`.
+Optionally, run the copilot service (see §11):
+
+```bash
+cd copilot && uv sync && uv run uvicorn main:app --host 127.0.0.1 --port 8100
+```
+
+Or, from the repo root, start the API + copilot + client together:
+
+```bash
+npm install && npm run dev
+```
+
+API on `http://localhost:8000`, client on `http://localhost:5173`, copilot on `http://127.0.0.1:8100`.
 
 > Run `seed:data` **before** `seed:users` — the driver login links to a seeded driver record.
 
@@ -348,3 +365,27 @@ API on `http://localhost:8000`, client on `http://localhost:5173`.
 
 **Worth demoing:** sign in as **Dispatcher** and try to book a vehicle over an existing trip;
 as **Driver** to see the self-service portal; as **Admin** to read the audit log.
+
+---
+
+## 11. Copilot — Knowledge & Query (vertical slice)
+
+A "knowledge + query copilot" is being built incrementally. This first slice ships **only the
+request path** — React → Express → FastAPI → back — with auth and RBAC enforced end to end. The
+Python service currently **echoes** the request so the plumbing is observable; embeddings,
+retrieval, NL→SQL and LLM answers land in later slices behind the same `/ask` contract.
+
+**How it fits the existing conventions:**
+
+- `copilot:query` is a capability in the server's table (`server/src/config/permissions.js`),
+  mirrored in `client/src/config/roles.js`. **Drivers are excluded.**
+- The route (`/api/v1/copilot`) declares its capability like every other router; the controller
+  returns the standard `{ success, message, data }` envelope and writes one **audit row per ask**.
+- The FastAPI service (`copilot/`) binds to **loopback only** and is never exposed to the browser.
+  Every route but `/health` requires a shared `x-internal-token`; Express is the only caller.
+- If the service is unconfigured or offline, the API returns `INTEGRATION_DISABLED` and the page
+  shows an unavailable state — the rest of TransitOps is unaffected.
+
+**Config:** set `COPILOT_SERVICE_URL` and `INTERNAL_SERVICE_TOKEN` in `server/.env`, and the same
+`INTERNAL_SERVICE_TOKEN` in `copilot/.env` (see `.env.example` in each). The service is managed
+with [uv](https://docs.astral.sh/uv/); see `copilot/README.md` to run it standalone.

@@ -54,6 +54,9 @@ export const CAPABILITIES = {
   // Dashboard — everyone with a login
   "dashboard:read": [ADMIN, FLEET_MANAGER, DISPATCHER, SAFETY_OFFICER, FINANCIAL_ANALYST, DRIVER],
 
+  // Copilot — knowledge + query assistant. DRIVER is deliberately excluded.
+  "copilot:query": [ADMIN, FLEET_MANAGER, DISPATCHER, SAFETY_OFFICER, FINANCIAL_ANALYST],
+
   // Administration
   "user:read": [ADMIN],
   "user:write": [ADMIN],
@@ -82,6 +85,15 @@ export function rolesFor(capability) {
 
 export function roleHasCapability(role, capability) {
   return rolesFor(capability).includes(role);
+}
+
+/**
+ * Every capability a role holds — the inverse view of the table above.
+ * Forwarded to the copilot service so later slices can scope answers to what
+ * the caller may see, without changing the request signature.
+ */
+export function capabilitiesFor(role) {
+  return Object.keys(CAPABILITIES).filter((capability) => CAPABILITIES[capability].includes(role));
 }
 
 export default CAPABILITIES;

@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Truck, Users, Route, Wrench, Building2,
-  Fuel, BarChart3, Settings, ChevronLeft, ChevronRight, X, UserCog, ScrollText, ClipboardList,
+  Fuel, BarChart3, Settings, ChevronLeft, ChevronRight, X, UserCog, ScrollText, ClipboardList, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,7 @@ const navItems = [
   { path: '/maintenance', label: 'Maintenance', icon: Wrench },
   { path: '/fuel-expenses', label: 'Fuel & Expenses', icon: Fuel },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/copilot', label: 'Copilot', icon: Sparkles },
   { path: '/users', label: 'User Management', icon: UserCog },
   { path: '/audit', label: 'Audit Log', icon: ScrollText },
   { path: '/settings', label: 'Settings', icon: Settings },

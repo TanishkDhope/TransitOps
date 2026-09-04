@@ -35,6 +35,7 @@ export const ROLE_ACCESS = {
       '/maintenance',
       '/fuel-expenses',
       '/analytics',
+      '/copilot',
       '/settings',
       '/users',
       '/audit',
@@ -42,19 +43,19 @@ export const ROLE_ACCESS = {
   },
   FLEET_MANAGER: {
     label: 'Fleet Manager',
-    routes: ['/dashboard', '/fleet', '/trips', '/maintenance', '/analytics', '/settings'],
+    routes: ['/dashboard', '/fleet', '/trips', '/maintenance', '/analytics', '/copilot', '/settings'],
   },
   DISPATCHER: {
     label: 'Dispatcher',
-    routes: ['/dashboard', '/trips', '/fleet', '/drivers', '/customers', '/settings'],
+    routes: ['/dashboard', '/trips', '/fleet', '/drivers', '/customers', '/copilot', '/settings'],
   },
   SAFETY_OFFICER: {
     label: 'Safety Officer',
-    routes: ['/dashboard', '/drivers', '/settings'],
+    routes: ['/dashboard', '/drivers', '/copilot', '/settings'],
   },
   FINANCIAL_ANALYST: {
     label: 'Financial Analyst',
-    routes: ['/dashboard', '/fuel-expenses', '/customers', '/analytics', '/settings'],
+    routes: ['/dashboard', '/fuel-expenses', '/customers', '/analytics', '/copilot', '/settings'],
   },
   // ISSUES #37 — drivers now have their own view of the system.
   DRIVER: {
@@ -85,6 +86,7 @@ export const CAPABILITIES = {
   'customer:read': ['ADMIN', 'DISPATCHER', 'FINANCIAL_ANALYST', 'FLEET_MANAGER'],
   'customer:write': ['ADMIN', 'FINANCIAL_ANALYST'],
   'report:read': ['ADMIN', 'FLEET_MANAGER', 'FINANCIAL_ANALYST'],
+  'copilot:query': ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'],
   'user:read': ['ADMIN'],
   'user:write': ['ADMIN'],
   'audit:read': ['ADMIN'],

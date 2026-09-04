@@ -286,6 +286,8 @@ export const updateDriver = asyncHandler(async (req, res) => {
 });
 
 export const suspendDriver = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+  
   const driver = await prisma.driver.findUnique({ where: { id: req.params.id } });
   if (!driver) throw notFound("Driver");
 
@@ -303,7 +305,10 @@ export const suspendDriver = asyncHandler(async (req, res) => {
   }
 
   const [updated] = await prisma.$transaction([
-    prisma.driver.update({ where: { id: req.params.id }, data: { status: "SUSPENDED" } }),
+    prisma.driver.update({ 
+      where: { id: req.params.id }, 
+      data: { status: "SUSPENDED", suspensionReason: reason || "No reason provided" } 
+    }),
     auditOp({
       actor: req.user,
       entity: "Driver",
@@ -361,7 +366,7 @@ export const updateDriverStatus = asyncHandler(async (req, res) => {
   const isReinstatement = driver.status === "SUSPENDED" && status === "AVAILABLE";
 
   const [updated] = await prisma.$transaction([
-    prisma.driver.update({ where: { id: req.params.id }, data: { status } }),
+    prisma.driver.update({ where: { id: req.params.id }, data: { status, suspensionReason: status === "SUSPENDED" ? req.body.reason || "No reason provided" : null } }),
     auditOp({
       actor: req.user,
       entity: "Driver",
